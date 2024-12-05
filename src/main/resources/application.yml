@@ -48,18 +48,18 @@ mybatis-plus:
 file:
   converter:
     factory:
-        xls: com.dz.dzreport.sql.domain.bean.convert.ExcelConvert
-        xlsx: com.dz.dzreport.sql.domain.bean.convert.ExcelConvert
-        csv: com.dz.dzreport.sql.domain.bean.convert.CsvConvert
-        pdf: com.dz.dzreport.sql.domain.bean.convert.PdfConvert
-        doc: com.dz.dzreport.sql.domain.bean.convert.DocConvert
-        docx: com.dz.dzreport.sql.domain.bean.convert.DocConvert
-        json: com.dz.dzreport.sql.domain.bean.convert.JsonConvert
-        sql: com.dz.dzreport.sql.domain.bean.convert.SqlConvert
-        txt: com.dz.dzreport.sql.domain.bean.convert.TxtConvert
-        mysql: com.dz.dzreport.sql.domain.excelInterface.impl.MySQLStrategy
-        postgresql: com.dz.dzreport.sql.domain.excelInterface.impl.PostgreSQLStrategy
-        oracle: com.dz.dzreport.sql.domain.excelInterface.impl.OracleStrategy
+        xls: com.dz.eToSQL.sql.domain.bean.convert.ExcelConvert
+        xlsx: com.dz.eToSQL.sql.domain.bean.convert.ExcelConvert
+        csv: com.dz.eToSQL.sql.domain.bean.convert.CsvConvert
+        pdf: com.dz.eToSQL.sql.domain.bean.convert.PdfConvert
+        doc: com.dz.eToSQL.sql.domain.bean.convert.DocConvert
+        docx: com.dz.eToSQL.sql.domain.bean.convert.DocConvert
+        json: com.dz.eToSQL.sql.domain.bean.convert.JsonConvert
+        sql: com.dz.eToSQL.sql.domain.bean.convert.SqlConvert
+        txt: com.dz.eToSQL.sql.domain.bean.convert.TxtConvert
+        mysql: com.dz.eToSQL.sql.domain.excelInterface.impl.MySQLStrategy
+        postgresql: com.dz.eToSQL.sql.domain.excelInterface.impl.PostgreSQLStrategy
+        oracle: com.dz.eToSQL.sql.domain.excelInterface.impl.OracleStrategy
 
 database:
   driver:

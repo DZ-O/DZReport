@@ -44,7 +44,7 @@ public class ExcelTableGenerator {
         // 生成CREATE TABLE SQL
         String createTableSQL = strategy.createTableSQL(dbTable, columns);
 
-        //生成INSERT语句
+        // 生成INSERT语句
         String insertSQL = generateInsertSQL(sheet, dbTable, columns);
 
         workbook.close();
@@ -53,15 +53,24 @@ public class ExcelTableGenerator {
 
     private String generateInsertSQL(Sheet sheet, String tableName, List<ColumnDefinition> columns) {
         StringBuilder sql = new StringBuilder();
-        int rowCount = sheet.getLastRowNum();
 
-        // 跳过标题行（第0行）
-        for (int rowIndex = 1; rowIndex <= rowCount; rowIndex++) {
+        // 找到表头行
+        int headerRowIndex = 0;
+        while (headerRowIndex <= sheet.getLastRowNum()) {
+            Row currentRow = sheet.getRow(headerRowIndex);
+            if (isValidHeaderRow(currentRow)) {
+                break;
+            }
+            headerRowIndex++;
+        }
+
+        // 从表头的下一行开始生成INSERT语句
+        for (int rowIndex = headerRowIndex + 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
             Row row = sheet.getRow(rowIndex);
-            if (row != null) {
+            if (row != null && isValidDataRow(row)) {
                 sql.append("INSERT INTO ").append(tableName).append(" (");
 
-                // Add column names
+                // 添加列名
                 for (int i = 0; i < columns.size(); i++) {
                     sql.append(columns.get(i).getName());
                     if (i < columns.size() - 1) {
@@ -71,7 +80,7 @@ public class ExcelTableGenerator {
 
                 sql.append(") VALUES (");
 
-                // Add values
+                // 添加值
                 for (int colIndex = 0; colIndex < columns.size(); colIndex++) {
                     Cell cell = row.getCell(colIndex);
                     if (cell != null) {
@@ -156,20 +165,43 @@ public class ExcelTableGenerator {
         }
     }
 
-    private List<ColumnDefinition> analyzeColumns(Sheet sheet) {
+    private List<ColumnDefinition> analyzeColumns(Sheet sheet) throws MyCustomException {
         List<ColumnDefinition> columns = new ArrayList<>();
-        Row headerRow = sheet.getRow(0);
-        int rowCount = Math.min(sheet.getLastRowNum(), 100);
+
+        // 查找第一个非空行作为表头
+        Row headerRow = null;
+        int headerRowIndex = 0;
+        int lastRowNum = sheet.getLastRowNum();
+
+        while (headerRowIndex <= lastRowNum) {
+            Row currentRow = sheet.getRow(headerRowIndex);
+            if (isValidHeaderRow(currentRow)) {
+                headerRow = currentRow;
+                break;
+            }
+            headerRowIndex++;
+        }
+
+        // 如果没有找到有效的表头行，抛出异常
+        if (headerRow == null) {
+            throw new MyCustomException(AppHttpCodeEnum.FILE_CONVERT_FAIL);
+        }
+
+        // 分析数据行（从表头的下一行开始）
+        int rowCount = Math.min(lastRowNum - headerRowIndex, 100);
 
         for (int colIndex = 0; colIndex < headerRow.getLastCellNum(); colIndex++) {
-            String columnName = headerRow.getCell(colIndex).getStringCellValue();
+            // 获取中文列名并转换
+            String chineseColumnName = headerRow.getCell(colIndex).getStringCellValue();
+            String englishColumnName = translateColumnName(chineseColumnName);
+
             Set<CellType> types = new HashSet<>();
             int maxLength = 0;
             boolean hasDecimals = false;
 
             // 分析列数据
-            for (int rowIndex = 1; rowIndex <= rowCount; rowIndex++) {
-                Row row = sheet.getRow(rowIndex);
+            for (int i = 1; i <= rowCount; i++) {
+                Row row = sheet.getRow(headerRowIndex + i);
                 if (row != null) {
                     Cell cell = row.getCell(colIndex);
                     if (cell != null) {
@@ -182,14 +214,100 @@ public class ExcelTableGenerator {
 
                         maxLength = maxLengthRef[0];
                         hasDecimals = hasDecimalsRef[0];
-
                     }
                 }
             }
 
-            columns.add(new ColumnDefinition(columnName, types, maxLength, hasDecimals));
+            columns.add(new ColumnDefinition(englishColumnName, types, maxLength, hasDecimals));
         }
 
         return columns;
+    }
+
+    /**
+     * 判断是否为有效的表头行
+     * @param row Excel行
+     * @return 是否有效
+     */
+    private boolean isValidHeaderRow(Row row) {
+        if (row == null) {
+            return false;
+        }
+
+        // 检查行中是否至少有一个非空单元格
+        for (int i = 0; i < row.getLastCellNum(); i++) {
+            Cell cell = row.getCell(i);
+            if (cell != null && cell.getCellType() != CellType.BLANK) {
+                String value = cell.toString().trim();
+                if (!value.isEmpty()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * 转换列名
+     * @param columnName 原始列名
+     * @return 转换后的列名
+     */
+    private String translateColumnName(String columnName) {
+        // 检查是否包含{{}}格式的内容
+        if (columnName.contains("{{") && columnName.contains("}}")) {
+            // 提取{{}}中的内容
+            int start = columnName.indexOf("{{") + 2;
+            int end = columnName.indexOf("}}");
+            if (start < end) {
+                String customName = columnName.substring(start, end).trim();
+                // 验证提取的名称是否符合数据库命名规范
+                if (isValidColumnName(customName)) {
+                    return customName;
+                }
+            }
+        }
+
+        // 如果没有{{}}或提取的名称无效，则进行中文转换
+        String sanitized = columnName.replaceAll("[\\s\\p{P}]", "");
+        String pinyin = PinyinUtil.getPinyin(sanitized, "");
+        String snakeCase = pinyin.replaceAll("([a-z])([A-Z])", "$1_$2").toLowerCase();
+
+        // 确保以字母开头
+        if (!snakeCase.matches("^[a-zA-Z].*")) {
+            snakeCase = "col_" + snakeCase;
+        }
+
+        return snakeCase;
+    }
+
+    /**
+     * 验证列名是否符合数据库命名规范
+     * @param columnName 列名
+     * @return 是否有效
+     */
+    private boolean isValidColumnName(String columnName) {
+        // 列名必须字母开头，只能包含字母、数字和下划线
+        return columnName.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
+    }
+
+    /**
+     * 判断是否为有效的数据行（至少有一个单元格不为空）
+     * @param row Excel行
+     * @return 是否有效
+     */
+    private boolean isValidDataRow(Row row) {
+        if (row == null) {
+            return false;
+        }
+        
+        for (int i = 0; i < row.getLastCellNum(); i++) {
+            Cell cell = row.getCell(i);
+            if (cell != null && cell.getCellType() != CellType.BLANK) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 }

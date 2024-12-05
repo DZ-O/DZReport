@@ -64,7 +64,7 @@ public abstract class FillConvertAbstract {
                     if (insertPattern != null) {
                         try (PreparedStatement pstmt = connection.prepareStatement(insertPattern)) {
                             // 从第二条SQL语句开始，都是INSERT语句
-                            for (int i = 1; i < sqlStatements.length; i++) {
+                            for (int i = 0; i < sqlStatements.length; i++) {
                                 String insertSql = sqlStatements[i].trim();
                                 if (!insertSql.isEmpty()) {
                                     // 解析VALUES部分

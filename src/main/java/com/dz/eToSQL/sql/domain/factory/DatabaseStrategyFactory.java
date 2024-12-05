@@ -3,7 +3,7 @@ package com.dz.eToSQL.sql.domain.factory;
 import com.dz.eToSQL.emums.AppHttpCodeEnum;
 import com.dz.eToSQL.exception.MyCustomException;
 import com.dz.eToSQL.sql.domain.excelInterface.DatabaseTypeStrategy;
-import com.dz.eToSQL.sql.service.ConverterService;
+import com.dz.eToSQL.sql.utills.FactoryCreater;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
 public class DatabaseStrategyFactory {
 
     @Autowired
-    private final ConverterService converterService;
+    private final FactoryCreater factoryCreater;
 
-    public DatabaseStrategyFactory(ConverterService converterService) {
-        this.converterService = converterService;
+    public DatabaseStrategyFactory(FactoryCreater factoryCreater) {
+        this.factoryCreater = factoryCreater;
     }
     public  DatabaseTypeStrategy getStrategy(String dbType) throws Exception {
-        DatabaseTypeStrategy strategy = converterService.createFactory(dbType);
+        DatabaseTypeStrategy strategy = factoryCreater.createFactory(dbType);
         if (strategy == null) {
             throw new MyCustomException(AppHttpCodeEnum.DB_TYPE_ERROR);
         }

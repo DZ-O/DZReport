@@ -1,7 +1,7 @@
 package com.dz.eToSQL.sql.domain.factory;
 
 import com.dz.eToSQL.sql.domain.bean.convert.abs.FillConvertAbstract;
-import com.dz.eToSQL.sql.service.ConverterService;
+import com.dz.eToSQL.sql.utills.FactoryCreater;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -12,13 +12,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class FileConvertFactory {
 
-    private final ConverterService converterService;
+    private final FactoryCreater factoryCreater;
 
-    public FileConvertFactory(ConverterService converterService) {
-        this.converterService = converterService;
+    public FileConvertFactory(FactoryCreater factoryCreater) {
+        this.factoryCreater = factoryCreater;
     }
 
     public FillConvertAbstract getConverter(String fileType) throws Exception {
-       return converterService.createFactory(fileType);
+       return factoryCreater.createFactory(fileType);
     }
 }

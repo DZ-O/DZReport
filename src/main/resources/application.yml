@@ -1,0 +1,82 @@
+server:
+  port: 8070
+
+spring:
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  redis:
+    database: 0
+    #    host: localhost       # Redis服务器地址
+    host: 127.0.0.1      # Redis服务器地址
+    port: 6379              # Redis服务器连接端口
+    password: 123456              # Redis服务器连接密码（默认为空）
+    pool:
+      max-active: 200       # 连接池最大连接数（使用负值表示没有限制）
+      max-idle: 10          # 连接池中的最大空闲连接
+      max-wait: -1          # 连接池最大阻塞等待时间（使用负值表示没有限制）
+      min-idle: 0           # 连接池中的最小空闲连接
+    timeout: 1000
+  datasource:
+      url: jdbc:mysql://localhost:3306/free_report_platform?characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+      username: root
+      password: dai123456
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      # 限制文件最大上传大小
+      tomcat:
+        ignore-exception-on-pre-load:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+security:
+  filter:
+    disallowed: ";%3B"
+
+mybatis-plus:
+  configuration:
+    # 日志
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: delFlag
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      id-type: auto
+
+# 配置工厂类
+file:
+  converter:
+    factory:
+        xls: com.dz.dzreport.sql.domain.bean.convert.ExcelConvert
+        xlsx: com.dz.dzreport.sql.domain.bean.convert.ExcelConvert
+        csv: com.dz.dzreport.sql.domain.bean.convert.CsvConvert
+        pdf: com.dz.dzreport.sql.domain.bean.convert.PdfConvert
+        doc: com.dz.dzreport.sql.domain.bean.convert.DocConvert
+        docx: com.dz.dzreport.sql.domain.bean.convert.DocConvert
+        json: com.dz.dzreport.sql.domain.bean.convert.JsonConvert
+        sql: com.dz.dzreport.sql.domain.bean.convert.SqlConvert
+        txt: com.dz.dzreport.sql.domain.bean.convert.TxtConvert
+        mysql: com.dz.dzreport.sql.domain.excelInterface.impl.MySQLStrategy
+        postgresql: com.dz.dzreport.sql.domain.excelInterface.impl.PostgreSQLStrategy
+        oracle: com.dz.dzreport.sql.domain.excelInterface.impl.OracleStrategy
+
+database:
+  driver:
+    config:
+      mysql:
+        driverClassName: com.mysql.cj.jdbc.Driver
+        urlTemplate: jdbc:mysql://%s:%d/%s?characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+      postgresql:
+        driverClassName: org.postgresql.Driver
+        urlTemplate: jdbc:postgresql://%s:%d/%s
+      oracle:
+        driverClassName: oracle.jdbc.OracleDriver
+        urlTemplate: jdbc:oracle:thin:@%s:%d/%s
+      sqlserver:
+        driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+        urlTemplate: jdbc:sqlserver://%s:%d;DatabaseName=%s;encrypt=true;trustServerCertificate=true
+      h2:
+        driverClassName: org.h2.Driver
+        urlTemplate: jdbc:h2:mem:%s
+

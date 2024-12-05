@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dz.dzreport.generator.mapper.ReportTemplatesMapper">
+
+    <resultMap id="BaseResultMap" type="com.dz.eToSQL.generator.domain.DO.ReportTemplates">
+            <id property="templateId" column="template_id" jdbcType="INTEGER"/>
+            <result property="userId" column="user_id" jdbcType="INTEGER"/>
+            <result property="name" column="name" jdbcType="VARCHAR"/>
+            <result property="templateDefinition" column="template_definition" jdbcType="OTHER"/>
+            <result property="createdAt" column="created_at" jdbcType="TIMESTAMP"/>
+            <result property="updatedAt" column="updated_at" jdbcType="TIMESTAMP"/>
+            <result property="customProperties" column="custom_properties" jdbcType="OTHER"/>
+            <result property="customFields" column="custom_fields" jdbcType="OTHER"/>
+            <result property="def1" column="def1" jdbcType="VARCHAR"/>
+            <result property="def2" column="def2" jdbcType="VARCHAR"/>
+            <result property="def3" column="def3" jdbcType="VARCHAR"/>
+            <result property="def4" column="def4" jdbcType="VARCHAR"/>
+            <result property="def5" column="def5" jdbcType="VARCHAR"/>
+            <result property="def6" column="def6" jdbcType="VARCHAR"/>
+            <result property="def7" column="def7" jdbcType="VARCHAR"/>
+            <result property="def8" column="def8" jdbcType="VARCHAR"/>
+            <result property="def9" column="def9" jdbcType="VARCHAR"/>
+            <result property="def10" column="def10" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        template_id,user_id,name,
+        template_definition,created_at,updated_at,
+        custom_properties,custom_fields,def1,
+        def2,def3,def4,
+        def5,def6,def7,
+        def8,def9,def10
+    </sql>
+</mapper>

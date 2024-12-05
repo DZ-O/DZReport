@@ -18,5 +18,6 @@ public class ColumnDefinition {
     private Set<CellType> types;
     private int maxLength;
     private boolean hasDecimals;
+    private boolean isPrimaryKey;
 
 }

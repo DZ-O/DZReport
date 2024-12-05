@@ -68,7 +68,7 @@ public class ExcelTableGenerator {
         for (int rowIndex = headerRowIndex + 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
             Row row = sheet.getRow(rowIndex);
             if (row != null && isValidDataRow(row)) {
-                sql.append("INSERT INTO ").append(tableName).append(" (");
+                sql.append("INSERT IGNORE INTO ").append(tableName).append(" (");
 
                 // 添加列名
                 for (int i = 0; i < columns.size(); i++) {
@@ -95,6 +95,7 @@ public class ExcelTableGenerator {
                 }
 
                 sql.append(");").append("\n");
+
             }
         }
 
@@ -182,26 +183,23 @@ public class ExcelTableGenerator {
             headerRowIndex++;
         }
 
-        // 如果没有找到有效的表头行，抛出异常
         if (headerRow == null) {
             throw new MyCustomException(AppHttpCodeEnum.FILE_CONVERT_FAIL);
         }
 
-        // 分析数据行（从表头的下一行开始）
         int rowCount = Math.min(lastRowNum - headerRowIndex, 100);
 
         for (int colIndex = 0; colIndex < headerRow.getLastCellNum(); colIndex++) {
-            // 获取中文列名并转换
-            String chineseColumnName = headerRow.getCell(colIndex).getStringCellValue();
-            String englishColumnName = translateColumnName(chineseColumnName);
+            String columnHeader = headerRow.getCell(colIndex).getStringCellValue();
+            ColumnNameResult nameResult = translateColumnName(columnHeader);
 
             Set<CellType> types = new HashSet<>();
             int maxLength = 0;
             boolean hasDecimals = false;
 
             // 分析列数据
-            for (int i = 1; i <= rowCount; i++) {
-                Row row = sheet.getRow(headerRowIndex + i);
+            for (int i = headerRowIndex + 1; i <= headerRowIndex + rowCount; i++) {
+                Row row = sheet.getRow(i);
                 if (row != null) {
                     Cell cell = row.getCell(colIndex);
                     if (cell != null) {
@@ -218,7 +216,13 @@ public class ExcelTableGenerator {
                 }
             }
 
-            columns.add(new ColumnDefinition(englishColumnName, types, maxLength, hasDecimals));
+            columns.add(new ColumnDefinition(
+                nameResult.name,
+                types,
+                maxLength,
+                hasDecimals,
+                nameResult.isPrimaryKey
+            ));
         }
 
         return columns;
@@ -249,21 +253,25 @@ public class ExcelTableGenerator {
     }
 
     /**
-     * 转换列名
+     * 转换列名并检查是否为主键
      * @param columnName 原始列名
-     * @return 转换后的列名
+     * @return 转换结果
      */
-    private String translateColumnName(String columnName) {
+    private ColumnNameResult translateColumnName(String columnName) {
+        String finalName;
+        boolean isPrimaryKey = columnName.contains("%pk%");
+
+        // 移除主键标识
+        columnName = columnName.replace("%pk%", "");
+
         // 检查是否包含{{}}格式的内容
         if (columnName.contains("{{") && columnName.contains("}}")) {
-            // 提取{{}}中的内容
             int start = columnName.indexOf("{{") + 2;
             int end = columnName.indexOf("}}");
             if (start < end) {
                 String customName = columnName.substring(start, end).trim();
-                // 验证提取的名称是否符合数据库命名规范
                 if (isValidColumnName(customName)) {
-                    return customName;
+                    return new ColumnNameResult(customName, isPrimaryKey);
                 }
             }
         }
@@ -278,7 +286,20 @@ public class ExcelTableGenerator {
             snakeCase = "col_" + snakeCase;
         }
 
-        return snakeCase;
+        return new ColumnNameResult(snakeCase, isPrimaryKey);
+    }
+
+    /**
+     * 列名转换结果类
+     */
+    private static class ColumnNameResult {
+        final String name;
+        final boolean isPrimaryKey;
+
+        ColumnNameResult(String name, boolean isPrimaryKey) {
+            this.name = name;
+            this.isPrimaryKey = isPrimaryKey;
+        }
     }
 
     /**
@@ -300,14 +321,14 @@ public class ExcelTableGenerator {
         if (row == null) {
             return false;
         }
-        
+
         for (int i = 0; i < row.getLastCellNum(); i++) {
             Cell cell = row.getCell(i);
             if (cell != null && cell.getCellType() != CellType.BLANK) {
                 return true;
             }
         }
-        
+
         return false;
     }
 }

@@ -103,12 +103,12 @@ public abstract class FillConvertAbstract {
     }
 
     private String findInsertPattern(String firstInsert) {
-        Pattern pattern = Pattern.compile("INSERT INTO ([^\\(]+)\\(([^\\)]+)\\) VALUES\\s*\\([^\\)]+\\)");
+        Pattern pattern = Pattern.compile("INSERT IGNORE INTO ([^\\(]+)\\(([^\\)]+)\\) VALUES\\s*\\([^\\)]+\\)");
         Matcher matcher = pattern.matcher(firstInsert);
         if (matcher.find()) {
             String tableName = matcher.group(1).trim();
             String columns = matcher.group(2);
-            return String.format("INSERT INTO %s (%s) VALUES (%s)",
+            return String.format("INSERT IGNORE INTO %s (%s) VALUES (%s)",
                 tableName,
                 columns,
                 Arrays.stream(columns.split(","))

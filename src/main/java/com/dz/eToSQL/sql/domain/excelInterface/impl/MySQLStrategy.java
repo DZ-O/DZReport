@@ -5,6 +5,7 @@ import com.dz.eToSQL.sql.domain.excelInterface.DatabaseTypeStrategy;
 import org.apache.poi.ss.usermodel.CellType;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -16,18 +17,31 @@ public class MySQLStrategy implements DatabaseTypeStrategy {
         StringBuilder sql = new StringBuilder();
         sql.append("CREATE TABLE IF NOT EXISTS ").append(tableName).append(" (\n");
 
+        // 添加列定义
+        List<String> primaryKeys = new ArrayList<>();
         for (int i = 0; i < columns.size(); i++) {
             ColumnDefinition column = columns.get(i);
-            String dataType = mapDataType(column.getTypes(), column.getMaxLength(), column.isHasDecimals());
-            sql.append(getColumnDefinition(column.getName(), dataType));
+            sql.append("    ").append(column.getName()).append(" ")
+               .append(mapDataType(column.getTypes(), column.getMaxLength(), column.isHasDecimals()));
 
-            if (i < columns.size() - 1) {
+            if (column.isPrimaryKey()) {
+                primaryKeys.add(column.getName());
+            }
+
+            if (i < columns.size() - 1 || !primaryKeys.isEmpty()) {
                 sql.append(",");
             }
             sql.append("\n");
         }
 
-        sql.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;");
+        // 添加主键约束
+        if (!primaryKeys.isEmpty()) {
+            sql.append("    PRIMARY KEY (")
+               .append(String.join(", ", primaryKeys))
+               .append(")\n");
+        }
+
+        sql.append(")");
         return sql.toString();
     }
 

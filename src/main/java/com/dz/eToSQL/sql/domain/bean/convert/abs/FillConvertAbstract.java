@@ -195,7 +195,7 @@ public abstract class FillConvertAbstract {
         Class.forName(dbConfig.getDriverClassName());
 
         // 构建URL
-        if (dbTypeLower.equals("h2")) {
+        if (dbTypeLower.equals("sqlite") || dbTypeLower.equals("h2")) {
             // H2特殊处理，因为只需要数据库名
             return String.format(dbConfig.getUrlTemplate(), dbName);
         } else {

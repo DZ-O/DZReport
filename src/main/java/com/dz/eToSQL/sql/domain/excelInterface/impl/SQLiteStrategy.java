@@ -10,13 +10,12 @@ import java.util.List;
 import java.util.Set;
 
 @Component
-public class OracleStrategy implements DatabaseTypeStrategy {
+public class SQLiteStrategy implements DatabaseTypeStrategy {
     @Override
     public String createTableSQL(String tableName, List<ColumnDefinition> columns) {
         StringBuilder sql = new StringBuilder();
         sql.append("CREATE TABLE ").append(tableName).append(" (\n");
 
-        // 添加列定义
         List<String> primaryKeys = new ArrayList<>();
         for (int i = 0; i < columns.size(); i++) {
             ColumnDefinition column = columns.get(i);
@@ -33,9 +32,8 @@ public class OracleStrategy implements DatabaseTypeStrategy {
             }
         }
 
-        // 添加主键约束
         if (!primaryKeys.isEmpty()) {
-            sql.append("    CONSTRAINT pk_").append(tableName).append(" PRIMARY KEY (")
+            sql.append("    PRIMARY KEY (")
                .append(String.join(", ", primaryKeys))
                .append(")\n");
         }
@@ -46,20 +44,20 @@ public class OracleStrategy implements DatabaseTypeStrategy {
 
     @Override
     public String getColumnDefinition(String columnName, String dataType) {
-        return String.format("  \"%s\" %s", columnName, dataType);
+        return String.format("\"%s\" %s", columnName, dataType);
     }
 
     @Override
     public String mapDataType(Set<CellType> types, int maxLength, boolean hasDecimals) {
         if (types.contains(CellType.STRING)) {
-            return String.format("VARCHAR2(%d)", Math.min(Math.max(maxLength, 1), 4000)); // Oracle VARCHAR2 最大长度为 4000
+            return "TEXT"; // SQLite doesn't have a specific VARCHAR type
         } else if (types.contains(CellType.NUMERIC)) {
             if (hasDecimals) {
-                return "NUMBER(20, 2)"; // 使用 NUMBER 类型表示小数
+                return "REAL"; // Use REAL for floating point numbers
             } else {
-                return maxLength <= 4 ? "NUMBER" : "NUMBER"; // 使用 NUMBER 类型表示整数
+                return "INTEGER"; // Use INTEGER for whole numbers
             }
         }
-        return "VARCHAR2(4000)"; // 默认类型
+        return "TEXT"; // Default type
     }
-}
+} 

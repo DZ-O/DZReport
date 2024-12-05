@@ -60,6 +60,8 @@ file:
         mysql: com.dz.eToSQL.sql.domain.excelInterface.impl.MySQLStrategy
         postgresql: com.dz.eToSQL.sql.domain.excelInterface.impl.PostgreSQLStrategy
         oracle: com.dz.eToSQL.sql.domain.excelInterface.impl.OracleStrategy
+        sqlserver: com.dz.eToSQL.sql.domain.excelInterface.impl.SqlServerStrategy
+        sqlite: com.dz.eToSQL.sql.domain.excelInterface.impl.SQLiteStrategy
 
 database:
   driver:
@@ -76,7 +78,7 @@ database:
       sqlserver:
         driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
         urlTemplate: jdbc:sqlserver://%s:%d;DatabaseName=%s;encrypt=true;trustServerCertificate=true
-      h2:
-        driverClassName: org.h2.Driver
-        urlTemplate: jdbc:h2:mem:%s
+      sqlite:
+        driverClassName: org.sqlite.JDBC
+        urlTemplate: jdbc:sqlite:%s
 

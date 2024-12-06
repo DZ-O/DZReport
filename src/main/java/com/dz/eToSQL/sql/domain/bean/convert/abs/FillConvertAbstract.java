@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 /**
  * @author daizhen
- * @Description
+ * @Description 将文件转化为sql并执行
  * @create 2024-12-04 16:20
  */
 @Component

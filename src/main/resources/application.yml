@@ -62,7 +62,10 @@ file:
         oracle: com.dz.eToSQL.sql.domain.excelInterface.impl.OracleStrategy
         sqlserver: com.dz.eToSQL.sql.domain.excelInterface.impl.SqlServerStrategy
         sqlite: com.dz.eToSQL.sql.domain.excelInterface.impl.SQLiteStrategy
-
+    # 配置数据处理类
+        xlsgenerator: com.dz.eToSQL.sql.domain.bean.generator.ExcelTableGenerator
+        xlsxgenerator: com.dz.eToSQL.sql.domain.bean.generator.ExcelTableGenerator
+# JDBC配置
 database:
   driver:
     config:

@@ -1,11 +1,13 @@
-package com.dz.eToSQL.sql.utills;
+package com.dz.eToSQL.sql.domain.bean.generator;
 
 import com.dz.eToSQL.emums.AppHttpCodeEnum;
 import com.dz.eToSQL.exception.MyCustomException;
 import com.dz.eToSQL.sql.domain.bean.ColumnDefinition;
+import com.dz.eToSQL.sql.domain.bean.generator.abs.FileGeneratorAbstact;
 import com.dz.eToSQL.sql.domain.excelInterface.DatabaseTypeStrategy;
 import com.dz.eToSQL.sql.domain.factory.DatabaseStrategyFactory;
 import com.dz.eToSQL.sql.domain.request.UploadRequest;
+import com.dz.eToSQL.sql.utills.PinyinUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -22,11 +24,12 @@ import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 @Component
-public class ExcelTableGenerator {
+public class ExcelTableGenerator extends FileGeneratorAbstact {
 
     @Autowired
     private DatabaseStrategyFactory databaseStrategyFactory;
 
+    @Override
     public String[] generateSQL(File file, UploadRequest uploadRequest) throws Exception {
         String dbType = uploadRequest.getDbType();
         String dbTable = uploadRequest.getDbTable();

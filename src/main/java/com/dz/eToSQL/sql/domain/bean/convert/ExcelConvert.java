@@ -2,8 +2,10 @@ package com.dz.eToSQL.sql.domain.bean.convert;
 
 import com.dz.eToSQL.exception.MyCustomException;
 import com.dz.eToSQL.sql.domain.bean.convert.abs.FillConvertAbstract;
+import com.dz.eToSQL.sql.domain.bean.generator.abs.FileGeneratorAbstact;
 import com.dz.eToSQL.sql.domain.request.UploadRequest;
-import com.dz.eToSQL.sql.utills.ExcelTableGenerator;
+import com.dz.eToSQL.sql.domain.bean.generator.ExcelTableGenerator;
+import com.dz.eToSQL.sql.utills.FactoryCreater;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,11 +19,11 @@ import java.io.File;
 @Component
 public class ExcelConvert extends FillConvertAbstract {
 
-    private final ExcelTableGenerator excelTableGenerator;
+    private final FactoryCreater factoryCreater;
 
     @Autowired
-    public ExcelConvert(ExcelTableGenerator excelTableGenerator) {
-        this.excelTableGenerator = excelTableGenerator;
+    public ExcelConvert(FactoryCreater factoryCreater) {
+        this.factoryCreater = factoryCreater;
     }
 
     @Override
@@ -29,12 +31,10 @@ public class ExcelConvert extends FillConvertAbstract {
         super.fillToSql(uploadFile, type, uploadRequest);
         String[] sql = null;
         try {
-            sql = excelTableGenerator.generateSQL(uploadFile, uploadRequest);
+            sql = ((FileGeneratorAbstact) factoryCreater.createFactory(type)).generateSQL(uploadFile, uploadRequest);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-
         return sql;
     }
 

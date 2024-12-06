@@ -75,7 +75,7 @@ public class CreatSqlServiceImpl implements CreatSqlService {
                 }
 
                 // 生成SQL文件
-                sqlFile = generateSqlFile(Arrays.toString(sql), file.getOriginalFilename());
+                sqlFile = generateSqlFile(Arrays.toString(sql), file.getOriginalFilename(), uploadRequest);
 
                 // 设置响应头
                 response.setContentType("application/octet-stream");
@@ -119,11 +119,9 @@ public class CreatSqlServiceImpl implements CreatSqlService {
      * @param originalFileName 原始文件名
      * @return SQL文件
      */
-    private File generateSqlFile(String sql, String originalFileName) throws IOException {
-
-        //去除首尾的 []
+    private File generateSqlFile(String sql, String originalFileName, UploadRequest uploadRequest) throws IOException {
+        // 去除首尾的 []
         sql = sql.substring(1, sql.length() - 1);
-
 
         // 确保目录存在
         File dir = new File(sqlTempPath);
@@ -132,9 +130,12 @@ public class CreatSqlServiceImpl implements CreatSqlService {
         }
 
         // 生成文件名
-        String baseName = FilenameUtils.getBaseName(originalFileName);
+        String dbName = uploadRequest.getDbName(); // 获取数据库名称
+        String dbTable = uploadRequest.getDbTable(); // 获取数据库表名称
         String timestamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        String sqlFileName = baseName + "_" + timestamp + ".sql";
+        
+        // 使用 dbName、dbTable 和时间戳组合文件名
+        String sqlFileName = String.format("%s_%s_%s.sql", dbName, dbTable, timestamp);
         File sqlFile = new File(dir, sqlFileName);
 
         // 写入SQL内容

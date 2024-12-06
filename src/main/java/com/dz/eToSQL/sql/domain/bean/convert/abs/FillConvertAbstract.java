@@ -159,7 +159,7 @@ public abstract class FillConvertAbstract {
         for (int i = 0; i < values.size(); i++) {
             String value = values.get(i).trim();
 
-            if (value.equals("NULL")) {
+            if ("NULL".equals(value)) {
                 pstmt.setNull(i + 1, Types.NULL);
             } else if (value.startsWith("'") && value.endsWith("'")) {
                 // 字符串值
@@ -195,7 +195,7 @@ public abstract class FillConvertAbstract {
         Class.forName(dbConfig.getDriverClassName());
 
         // 构建URL
-        if (dbTypeLower.equals("sqlite") || dbTypeLower.equals("h2")) {
+        if ("sqlite".equals(dbTypeLower) || "h2".equals(dbTypeLower)) {
             // H2特殊处理，因为只需要数据库名
             return String.format(dbConfig.getUrlTemplate(), dbName);
         } else {

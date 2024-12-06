@@ -33,6 +33,7 @@ public class ExcelTableGenerator extends FileGeneratorAbstact {
     public String[] generateSQL(File file, UploadRequest uploadRequest) throws Exception {
         String dbType = uploadRequest.getDbType();
         String dbTable = uploadRequest.getDbTable();
+        String dbName = uploadRequest.getDbName();
 
         // 获取数据库策略
         DatabaseTypeStrategy strategy = databaseStrategyFactory.getStrategy(dbType);
@@ -45,7 +46,7 @@ public class ExcelTableGenerator extends FileGeneratorAbstact {
         List<ColumnDefinition> columns = analyzeColumns(sheet);
 
         // 生成CREATE TABLE SQL
-        String createTableSQL = strategy.createTableSQL(dbTable, columns);
+        String createTableSQL = strategy.createTableSQL(dbName, dbTable, columns);
 
         // 生成INSERT语句
         String insertSQL = generateInsertSQL(sheet, dbTable, columns);

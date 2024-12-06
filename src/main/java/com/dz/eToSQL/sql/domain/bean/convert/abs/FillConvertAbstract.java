@@ -56,34 +56,38 @@ public abstract class FillConvertAbstract {
 
                 // 使用PreparedStatement批量执行INSERT语句
                 if (sqlStatements.length > 1) {
+                    int length = sqlStatements.length;
                     // 分割SQL语句
-                    sqlStatements = sqlStatements[1].split(";");
+                    for (int n = 1; n < length; n++) {
+                        String[] sqlStr = sqlStatements[n].split(";");
 
-                    // 找到第一条INSERT语句的模式
-                    String insertPattern = findInsertPattern(sqlStatements[1]);
-                    if (insertPattern != null) {
-                        try (PreparedStatement pstmt = connection.prepareStatement(insertPattern)) {
-                            // 从第二条SQL语句开始，都是INSERT语句
-                            for (int i = 0; i < sqlStatements.length; i++) {
-                                String insertSql = sqlStatements[i].trim();
-                                if (!insertSql.isEmpty()) {
-                                    // 解析VALUES部分
-                                    List<String> values = parseValues(insertSql);
-                                    // 设置参数
-                                    setParameters(pstmt, values);
-                                    // 添加到批处理
-                                    pstmt.addBatch();
+                        // 找到第一条INSERT语句的模式
+                        String insertPattern = findInsertPattern(sqlStr[0]);
+                        if (insertPattern != null) {
+                            try (PreparedStatement pstmt = connection.prepareStatement(insertPattern)) {
+                                // 从第二条SQL语句开始，都是INSERT语句
+                                for (int i = 0; i < sqlStr.length; i++) {
+                                    String insertSql = sqlStr[i].trim();
+                                    System.out.println(insertSql);
+                                    if (!insertSql.isEmpty()) {
+                                        // 解析VALUES部分
+                                        List<String> values = parseValues(insertSql);
+                                        // 设置参数
+                                        setParameters(pstmt, values);
+                                        // 添加到批处理
+                                        pstmt.addBatch();
 
-                                    // 每1000条提交一次
-                                    if (i % 1000 == 0) {
-                                        pstmt.executeBatch();
-                                        connection.commit();
-                                        pstmt.clearBatch();
+                                        // 每1000条提交一次
+                                        if (i % 1000 == 0) {
+                                            pstmt.executeBatch();
+                                            connection.commit();
+                                            pstmt.clearBatch();
+                                        }
                                     }
                                 }
+                                // 执行剩余的批处理
+                                pstmt.executeBatch();
                             }
-                            // 执行剩余的批处理
-                            pstmt.executeBatch();
                         }
                     }
                 }

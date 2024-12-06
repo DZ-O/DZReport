@@ -12,19 +12,19 @@ import java.util.Set;
 @Component
 public class PostgreSQLStrategy implements DatabaseTypeStrategy {
     @Override
-    public String createTableSQL(String tableName, List<ColumnDefinition> columns) {
+    public String createTableSQL(String dbName, String tableName, List<ColumnDefinition> columns) {
         StringBuilder sql = new StringBuilder();
-        sql.append("CREATE TABLE ").append(tableName).append(" (\n");
+        sql.append("CREATE TABLE ").append(dbName).append(".").append(tableName).append(" (\n");
 
         List<String> primaryKeys = new ArrayList<>();
         for (int i = 0; i < columns.size(); i++) {
             ColumnDefinition column = columns.get(i);
             sql.append("    ").append(getColumnDefinition(column.getName(), mapDataType(column.getTypes(), column.getMaxLength(), column.isHasDecimals())));
-            
+
             if (column.isPrimaryKey()) {
                 primaryKeys.add(column.getName());
             }
-            
+
             if (i < columns.size() - 1) {
                 sql.append(",\n");
             } else {

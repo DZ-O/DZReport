@@ -65,6 +65,7 @@ file:
     # 配置数据处理类
         xlsgenerator: com.dz.eToSQL.sql.domain.bean.generator.ExcelTableGenerator
         xlsxgenerator: com.dz.eToSQL.sql.domain.bean.generator.ExcelTableGenerator
+        csvgenerator: com.dz.eToSQL.sql.domain.bean.generator.CsvTableGenerator
 # JDBC配置
 database:
   driver:

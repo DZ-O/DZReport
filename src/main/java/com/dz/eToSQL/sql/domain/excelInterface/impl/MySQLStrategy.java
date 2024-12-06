@@ -13,9 +13,9 @@ import java.util.Set;
 @Component
 public class MySQLStrategy implements DatabaseTypeStrategy {
     @Override
-    public String createTableSQL(String tableName, List<ColumnDefinition> columns) {
+    public String createTableSQL(String dbName, String tableName, List<ColumnDefinition> columns) {
         StringBuilder sql = new StringBuilder();
-        sql.append("CREATE TABLE IF NOT EXISTS ").append(tableName).append(" (\n");
+        sql.append("CREATE TABLE IF NOT EXISTS ").append(dbName).append(".").append(tableName).append(" (\n");
 
         // 添加列定义
         List<String> primaryKeys = new ArrayList<>();

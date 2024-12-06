@@ -20,7 +20,7 @@ public class FileGeneratorFactory {
         this.factoryCreater = factoryCreater;
     }
 
-    public FileGeneratorAbstact getConverter(String fileType) throws Exception {
+    public FileGeneratorAbstact getGenerator(String fileType) throws Exception {
         return factoryCreater.createFactory(fileType+ key);
     }
 }

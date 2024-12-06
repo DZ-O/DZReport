@@ -16,6 +16,9 @@
 
 ### 3. 数据读取与 SQL 生成
 
+- **`com.dz.eToSQL.sql.domain.factory.FileGeneratorFactory`**
+  - 该抽象类提供了数据读取工厂类。
+
 - **`com.dz.eToSQL.sql.domain.bean.generator.abs.FileGeneratorAbstact`**
   - 针对不同类型文件的数据读取和 SQL 生成的抽象类。
   

@@ -78,7 +78,7 @@ public abstract class FillConvertAbstract {
                                         pstmt.addBatch();
 
                                         // 每1000条提交一次
-                                        if (i % 1000 == 0) {
+                                        if ((i + 1) % 1000 == 0) {
                                             pstmt.executeBatch();
                                             connection.commit();
                                             pstmt.clearBatch();

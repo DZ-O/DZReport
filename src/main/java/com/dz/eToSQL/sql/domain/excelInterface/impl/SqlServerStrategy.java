@@ -15,7 +15,7 @@ public class SqlServerStrategy implements DatabaseTypeStrategy {
     public String createTableSQL(String dbName, String tableName, List<ColumnDefinition> columns) {
         StringBuilder sql = new StringBuilder();
         sql.append("IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='").append(dbName).append(".").append(tableName).append("' AND xtype='U')\n");
-        sql.append("CREATE TABLE ").append(tableName).append(" (\n");
+        sql.append("CREATE TABLE ").append(dbName).append(".").append(tableName).append(" (\n");
 
         List<String> primaryKeys = new ArrayList<>();
         for (int i = 0; i < columns.size(); i++) {

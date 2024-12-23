@@ -46,7 +46,7 @@ public class JsonGenerator extends FileGeneratorAbstact {
         String createTableSQL = strategy.createTableSQL(dbName, dbTable, columns);
 
         // 生成 INSERT 语句
-        String insertSQL = generateInsertSQL(rootNode, dbTable, columns);
+        String insertSQL = generateInsertSQL(rootNode,dbName, dbTable, columns);
 
         return new String[]{createTableSQL, insertSQL};
     }
@@ -102,13 +102,13 @@ public class JsonGenerator extends FileGeneratorAbstact {
         return columns;
     }
 
-    private String generateInsertSQL(JsonNode rootNode, String tableName, List<ColumnDefinition> columns) {
+    private String generateInsertSQL(JsonNode rootNode,String dbName, String tableName, List<ColumnDefinition> columns) {
         StringBuilder sql = new StringBuilder();
 
         // 检查 rootNode 是否是数组
         if (rootNode.isArray()) {
             for (JsonNode node : rootNode) {
-                sql.append("INSERT IGNORE INTO ").append(tableName).append(" (");
+                sql.append("INSERT IGNORE INTO ").append(dbName+"."+tableName).append(" (");
 
                 for (int i = 0; i < columns.size(); i++) {
                     sql.append(columns.get(i).getName());

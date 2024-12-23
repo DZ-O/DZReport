@@ -5,55 +5,57 @@ import com.dz.eToSQL.sql.domain.bean.generator.abs.FileGeneratorAbstact;
 import com.dz.eToSQL.sql.domain.excelInterface.DatabaseTypeStrategy;
 import com.dz.eToSQL.sql.domain.factory.DatabaseStrategyFactory;
 import com.dz.eToSQL.sql.domain.request.UploadRequest;
-import com.dz.eToSQL.sql.utills.PinyinUtil;
-import org.apache.tika.detect.DefaultDetector;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.mime.MediaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.poi.ss.usermodel.CellType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.apache.poi.ss.usermodel.CellType;
 
-import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 @Component
-public class CsvTableGenerator extends FileGeneratorAbstact {
+public class TxtGenerator extends FileGeneratorAbstact {
 
     @Autowired
     private DatabaseStrategyFactory databaseStrategyFactory;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @Override
     public String[] generateSQL(File file, UploadRequest uploadRequest) throws Exception {
-        Charset charset = detectCharset(file);
-        List<ColumnDefinition> columns = analyzeColumns(file, charset);
-        DatabaseTypeStrategy strategy = databaseStrategyFactory.getStrategy(uploadRequest.getDbType());
-        String createTableSQL = strategy.createTableSQL(uploadRequest.getDbName(), uploadRequest.getDbTable(), columns);
-        List<String> insertSQLs = generateInsertSQLs(file, charset,uploadRequest.getDbName(), uploadRequest.getDbTable(), columns);
+        String dbType = uploadRequest.getDbType();
+        String dbTable = uploadRequest.getDbTable();
+        String dbName = uploadRequest.getDbName();
+
+        // 获取数据库策略
+        DatabaseTypeStrategy strategy = databaseStrategyFactory.getStrategy(dbType);
+
+        // 读取并分析TXT文件
+        List<ColumnDefinition> columns = analyzeColumns(file);
+
+        // 生成CREATE TABLE SQL
+        String createTableSQL = strategy.createTableSQL(dbName, dbTable, columns);
+
+        // 生成INSERT语句
+        List<String> insertSQLs = generateInsertSQLs(file,dbName, dbTable, columns);
         insertSQLs.add(0, createTableSQL);
+
         return insertSQLs.toArray(new String[0]);
     }
 
-    private Charset detectCharset(File file) throws IOException {
-        Metadata metadata = new Metadata();
-        try (BufferedInputStream inputStream = new BufferedInputStream(Files.newInputStream(file.toPath()))) {
-            DefaultDetector detector = new DefaultDetector();
-            MediaType mediaType = detector.detect(inputStream, metadata);
-            String charsetName = metadata.get("Content-Encoding");
-            return charsetName != null ? Charset.forName(charsetName) : Charset.forName("UTF-8");
-        }
-    }
-
-    private List<ColumnDefinition> analyzeColumns(File file, Charset charset) throws IOException {
+    private List<ColumnDefinition> analyzeColumns(File file) throws Exception {
         List<ColumnDefinition> columns = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), charset))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
             String headerLine = br.readLine();
             if (headerLine != null) {
-                String[] headers = headerLine.split(",");
+                String[] headers = headerLine.split("\t");
                 for (String header : headers) {
                     ColumnNameResult nameResult = translateColumnName(header.trim());
                     columns.add(new ColumnDefinition(nameResult.name, new HashSet<>(), 0, false, nameResult.isPrimaryKey));
@@ -64,7 +66,7 @@ public class CsvTableGenerator extends FileGeneratorAbstact {
                 String line;
                 int rowCount = 0;
                 while ((line = br.readLine()) != null && rowCount < sampleSize) {
-                    String[] values = line.split(",");
+                    String[] values = line.split("\t", -1);
                     for (int i = 0; i < values.length; i++) {
                         detectDataType(columns.get(i), values[i].trim());
                     }
@@ -90,13 +92,13 @@ public class CsvTableGenerator extends FileGeneratorAbstact {
         column.setMaxLength(Math.max(column.getMaxLength(), value.length()));
     }
 
-    private List<String> generateInsertSQLs(File file, Charset charset, String dbName,String tableName, List<ColumnDefinition> columns) throws IOException {
+    private List<String> generateInsertSQLs(File file,String dbName, String tableName, List<ColumnDefinition> columns) throws Exception {
         List<String> insertSQLs = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), charset))) {
-            String headerLine = br.readLine(); // Skip header line
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+            String headerLine = br.readLine(); // 跳过标题行
             String line;
             while ((line = br.readLine()) != null) {
-                String[] values = line.split(",",-1);
+                String[] values = line.split("\t", -1);
                 if (values.length != columns.size()) {
                     continue;
                 }
@@ -115,28 +117,13 @@ public class CsvTableGenerator extends FileGeneratorAbstact {
                     if (value.isEmpty()) {
                         sql.append("NULL");
                     } else {
-                        Set<CellType> types = columns.get(i).getTypes();
-                        if (types.contains(CellType.NUMERIC)) {
-                            if (value.matches("-?\\d+(\\.\\d+)?")) {
-                                sql.append(value);
-                            } else {
-                                sql.append("NULL");
-                            }
-                        } else if (types.contains(CellType.BOOLEAN)) {
-                            sql.append(Boolean.parseBoolean(value));
-                        } else if (types.contains(CellType.STRING)) {
-                            sql.append("'").append(escapeSQLString(value)).append("'");
-                        } else if (types.contains(CellType.BLANK)) {
-                            sql.append("NULL");
-                        } else {
-                            sql.append("'").append(escapeSQLString(value)).append("'");
-                        }
+                        sql.append("'").append(escapeSQLString(value)).append("'");
                     }
                     if (i < values.length - 1) {
                         sql.append(", ");
                     }
                 }
-                sql.append(");");
+                sql.append(")");
                 insertSQLs.add(sql.toString());
             }
         }
@@ -148,34 +135,17 @@ public class CsvTableGenerator extends FileGeneratorAbstact {
     }
 
     private ColumnNameResult translateColumnName(String columnName) {
-        String finalName;
         boolean isPrimaryKey = columnName.contains("%pk%");
         columnName = columnName.replace("%pk%", "");
 
-        if (columnName.contains("{{") && columnName.contains("}}")) {
-            int start = columnName.indexOf("{{") + 2;
-            int end = columnName.indexOf("}}");
-            if (start < end) {
-                String customName = columnName.substring(start, end).trim();
-                if (isValidColumnName(customName)) {
-                    return new ColumnNameResult(customName, isPrimaryKey);
-                }
-            }
-        }
-
         String sanitized = columnName.replaceAll("[\\s\\p{P}]", "");
-        String pinyin = PinyinUtil.getPinyin(sanitized, "");
-        String snakeCase = pinyin.replaceAll("([a-z])([A-Z])", "$1_$2").toLowerCase();
+        String snakeCase = sanitized.replaceAll("([a-z])([A-Z])", "$1_$2").toLowerCase();
 
         if (!snakeCase.matches("^[a-zA-Z].*")) {
             snakeCase = "col_" + snakeCase;
         }
 
         return new ColumnNameResult(snakeCase, isPrimaryKey);
-    }
-
-    private boolean isValidColumnName(String columnName) {
-        return columnName.matches("^[a-zA-Z][a-zA-Z0-9_]*$");
     }
 
     private static class ColumnNameResult {

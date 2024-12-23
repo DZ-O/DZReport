@@ -19,5 +19,4 @@ public class ColumnDefinition {
     private int maxLength;
     private boolean hasDecimals;
     private boolean isPrimaryKey;
-
 }

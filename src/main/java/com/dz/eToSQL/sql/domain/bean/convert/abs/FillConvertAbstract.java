@@ -4,6 +4,7 @@ import com.dz.eToSQL.emums.AppHttpCodeEnum;
 import com.dz.eToSQL.exception.MyCustomException;
 import com.dz.eToSQL.sql.config.DatabaseDriverProperties;
 import com.dz.eToSQL.sql.domain.request.UploadRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -22,6 +26,7 @@ import java.util.stream.Collectors;
  * @Description 将文件转化为sql并执行
  * @create 2024-12-04 16:20
  */
+@Slf4j
 @Component
 public abstract class FillConvertAbstract {
 
@@ -32,6 +37,7 @@ public abstract class FillConvertAbstract {
     public String[] fillToSql(File uploadFile, String type, UploadRequest uploadRequest) {
         return null;
     }
+
 
     public Boolean executeSql(String[] sqlStatements, UploadRequest uploadRequest) throws ClassNotFoundException, MyCustomException {
         String dbType = uploadRequest.getDbType();
@@ -44,59 +50,50 @@ public abstract class FillConvertAbstract {
         // 构建数据库连接 URL
         String dbUrl = loadDriverClass(dbType, dbIp, dbPort, dbName);
 
+        ExecutorService executorService = Executors.newFixedThreadPool(10); // 创建一个固定大小的线程池
+
         try (Connection connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword)) {
             // 关闭自动提交
             connection.setAutoCommit(false);
 
             try (Statement statement = connection.createStatement()) {
-
-
                 // 执行CREATE TABLE语句
                 statement.execute(sqlStatements[0] + ";");
 
                 // 使用PreparedStatement批量执行INSERT语句
                 if (sqlStatements.length > 1) {
-                    int length = sqlStatements.length;
-                    // 分割SQL语句
-                    for (int n = 1; n < length; n++) {
+                    for (int n = 1; n < sqlStatements.length; n++) {
                         String[] sqlStr = sqlStatements[n].split(";");
-
-                        // 找到第一条INSERT语句的模式
                         String insertPattern = findInsertPattern(sqlStr[0]);
-                        if (insertPattern != null) {
-                            try (PreparedStatement pstmt = connection.prepareStatement(insertPattern)) {
-                                // 从第二条SQL语句开始，都是INSERT语句
-                                for (int i = 0; i < sqlStr.length; i++) {
-                                    String insertSql = sqlStr[i].trim();
-                                    System.out.println(insertSql);
-                                    if (!insertSql.isEmpty()) {
-                                        // 解析VALUES部分
-                                        List<String> values = parseValues(insertSql);
-                                        // 设置参数
-                                        setParameters(pstmt, values);
-                                        // 添加到批处理
-                                        pstmt.addBatch();
 
-                                        // 每1000条提交一次
-                                        if ((i + 1) % 1000 == 0) {
-                                            pstmt.executeBatch();
-                                            connection.commit();
-                                            pstmt.clearBatch();
+                        if (insertPattern != null) {
+                            for (String insertSql : sqlStr) {
+                                if (!insertSql.trim().isEmpty()) {
+                                    executorService.submit(() -> {
+                                        try (PreparedStatement pstmt = connection.prepareStatement(insertPattern)) {
+                                            List<String> values = parseValues(insertSql);
+                                            setParameters(pstmt, values);
+                                            pstmt.executeUpdate();
+                                        } catch (SQLException e) {
+                                            log.error("执行sql失败：" + e.getMessage(), e);
                                         }
-                                    }
+                                    });
                                 }
-                                // 执行剩余的批处理
-                                pstmt.executeBatch();
                             }
                         }
                     }
                 }
+
+                // 关闭线程池并等待所有任务完成
+                executorService.shutdown();
+                executorService.awaitTermination(1, TimeUnit.HOURS);
 
                 // 提交事务
                 connection.commit();
                 return true;
 
             } catch (Exception e) {
+                log.info("执行sql失败：" + e);
                 // 发生异常时回滚
                 connection.rollback();
                 throw new MyCustomException(AppHttpCodeEnum.SQL_EXECUTE_FAIL);

@@ -27,8 +27,8 @@ spring:
         ignore-exception-on-pre-load:
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+      max-file-size: 200MB
+      max-request-size: 200MB
 security:
   filter:
     disallowed: ";%3B"
@@ -66,6 +66,7 @@ file:
         xlsgenerator: com.dz.eToSQL.sql.domain.bean.generator.ExcelTableGenerator
         xlsxgenerator: com.dz.eToSQL.sql.domain.bean.generator.ExcelTableGenerator
         csvgenerator: com.dz.eToSQL.sql.domain.bean.generator.CsvTableGenerator
+        jsongenerator: com.dz.eToSQL.sql.domain.bean.generator.JsonGenerator
 # JDBC配置
 database:
   driver:
@@ -81,7 +82,7 @@ database:
         urlTemplate: jdbc:oracle:thin:@%s:%d/%s
       sqlserver:
         driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
-        urlTemplate: jdbc:sqlserver://%s:%d;DatabaseName=%s;encrypt=true;trustServerCertificate=true
+        urlTemplate: jdbc:sqlserver://%s:%d;databaseName=%s;encrypt=true;trustServerCertificate=true
       sqlite:
         driverClassName: org.sqlite.JDBC
         urlTemplate: jdbc:sqlite:%s

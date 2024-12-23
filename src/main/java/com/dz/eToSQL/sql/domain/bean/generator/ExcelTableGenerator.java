@@ -49,13 +49,13 @@ public class ExcelTableGenerator extends FileGeneratorAbstact {
         String createTableSQL = strategy.createTableSQL(dbName, dbTable, columns);
 
         // 生成INSERT语句
-        String insertSQL = generateInsertSQL(sheet, dbTable, columns);
+        String insertSQL = generateInsertSQL(sheet, dbName,dbTable, columns);
 
         workbook.close();
         return new String[]{createTableSQL, insertSQL};
     }
 
-    private String generateInsertSQL(Sheet sheet, String tableName, List<ColumnDefinition> columns) {
+    private String generateInsertSQL(Sheet sheet, String dbName,String tableName, List<ColumnDefinition> columns) {
         StringBuilder sql = new StringBuilder();
 
         // 找到表头行
@@ -72,7 +72,7 @@ public class ExcelTableGenerator extends FileGeneratorAbstact {
         for (int rowIndex = headerRowIndex + 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
             Row row = sheet.getRow(rowIndex);
             if (row != null && isValidDataRow(row)) {
-                sql.append("INSERT IGNORE INTO ").append(tableName).append(" (");
+                sql.append("INSERT IGNORE INTO ").append(dbName+"."+tableName).append(" (");
 
                 // 添加列名
                 for (int i = 0; i < columns.size(); i++) {

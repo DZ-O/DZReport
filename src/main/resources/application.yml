@@ -67,6 +67,7 @@ file:
         xlsxgenerator: com.dz.eToSQL.sql.domain.bean.generator.ExcelTableGenerator
         csvgenerator: com.dz.eToSQL.sql.domain.bean.generator.CsvTableGenerator
         jsongenerator: com.dz.eToSQL.sql.domain.bean.generator.JsonGenerator
+        txtgenerator: com.dz.eToSQL.sql.domain.bean.generator.TxtGenerator
 # JDBC配置
 database:
   driver:

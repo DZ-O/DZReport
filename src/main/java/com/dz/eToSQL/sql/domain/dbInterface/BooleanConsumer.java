@@ -1,4 +1,4 @@
-package com.dz.eToSQL.sql.domain.excelInterface;
+package com.dz.eToSQL.sql.domain.dbInterface;
 
 @FunctionalInterface
 public interface BooleanConsumer {

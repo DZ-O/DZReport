@@ -1,7 +1,7 @@
-package com.dz.eToSQL.sql.domain.excelInterface.impl;
+package com.dz.eToSQL.sql.domain.dbInterface.impl;
 
 import com.dz.eToSQL.sql.domain.bean.ColumnDefinition;
-import com.dz.eToSQL.sql.domain.excelInterface.DatabaseTypeStrategy;
+import com.dz.eToSQL.sql.domain.dbInterface.DatabaseTypeStrategy;
 import org.apache.poi.ss.usermodel.CellType;
 import org.springframework.stereotype.Component;
 

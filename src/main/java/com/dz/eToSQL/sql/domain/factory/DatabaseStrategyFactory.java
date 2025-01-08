@@ -2,7 +2,7 @@ package com.dz.eToSQL.sql.domain.factory;
 
 import com.dz.eToSQL.emums.AppHttpCodeEnum;
 import com.dz.eToSQL.exception.MyCustomException;
-import com.dz.eToSQL.sql.domain.excelInterface.DatabaseTypeStrategy;
+import com.dz.eToSQL.sql.domain.dbInterface.DatabaseTypeStrategy;
 import com.dz.eToSQL.sql.utills.FactoryCreater;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

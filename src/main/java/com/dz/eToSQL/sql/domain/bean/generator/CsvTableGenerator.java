@@ -2,7 +2,7 @@ package com.dz.eToSQL.sql.domain.bean.generator;
 
 import com.dz.eToSQL.sql.domain.bean.ColumnDefinition;
 import com.dz.eToSQL.sql.domain.bean.generator.abs.FileGeneratorAbstact;
-import com.dz.eToSQL.sql.domain.excelInterface.DatabaseTypeStrategy;
+import com.dz.eToSQL.sql.domain.dbInterface.DatabaseTypeStrategy;
 import com.dz.eToSQL.sql.domain.factory.DatabaseStrategyFactory;
 import com.dz.eToSQL.sql.domain.request.UploadRequest;
 import com.dz.eToSQL.sql.utills.PinyinUtil;

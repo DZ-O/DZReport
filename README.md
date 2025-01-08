@@ -27,7 +27,7 @@
 
 ### 4. 数据库策略接口
 
-- **`com.dz.eToSQL.sql.domain.excelInterface.DatabaseTypeStrategy`**
+- **`com.dz.eToSQL.sql.domain.dbInterface.DatabaseTypeStrategy`**
   - 针对不同数据库实现该接口，使用不同的 SQL 生成策略。
 
 ### 5. SQL 执行
@@ -54,11 +54,11 @@ file:
         json: com.dz.eToSQL.sql.domain.bean.convert.JsonConvert  
         sql: com.dz.eToSQL.sql.domain.bean.convert.SqlConvert  
         txt: com.dz.eToSQL.sql.domain.bean.convert.TxtConvert  
-        mysql: com.dz.eToSQL.sql.domain.excelInterface.impl.MySQLStrategy  
-        postgresql: com.dz.eToSQL.sql.domain.excelInterface.impl.PostgreSQLStrategy  
-        oracle: com.dz.eToSQL.sql.domain.excelInterface.impl.OracleStrategy  
-        sqlserver: com.dz.eToSQL.sql.domain.excelInterface.impl.SqlServerStrategy  
-        sqlite: com.dz.eToSQL.sql.domain.excelInterface.impl.SQLiteStrategy  
+        mysql: com.dz.eToSQL.sql.domain.dbInterface.impl.MySQLStrategy  
+        postgresql: com.dz.eToSQL.sql.domain.dbInterface.impl.PostgreSQLStrategy  
+        oracle: com.dz.eToSQL.sql.domain.dbInterface.impl.OracleStrategy  
+        sqlserver: com.dz.eToSQL.sql.domain.dbInterface.impl.SqlServerStrategy  
+        sqlite: com.dz.eToSQL.sql.domain.dbInterface.impl.SQLiteStrategy  
     # 配置数据处理类  
         xlsgenerator: com.dz.eToSQL.sql.domain.bean.generator.ExcelTableGenerator  
         xlsxgenerator: com.dz.eToSQL.sql.domain.bean.generator.ExcelTableGenerator  

@@ -1,4 +1,4 @@
-package com.dz.eToSQL.sql.domain.excelInterface;
+package com.dz.eToSQL.sql.domain.dbInterface;
 
 import com.dz.eToSQL.sql.domain.bean.ColumnDefinition;
 import org.apache.poi.ss.usermodel.CellType;
